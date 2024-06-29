@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  php:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      container_name: php
+      working_dir: /var/www
+      volumes:
+        - .:/var/www
+      networks:
+        - symfony
+  web:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - php
+    networks:
+      - symfony
+
+  db:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: symfony
+      MYSQL_USER: symfony
+      MYSQL_PASSWORD: symfony
+    ports:
+      - "3306:3306"
+    networks:
+      - symfony
+
+networks:
+  symfony:
+    driver: bridge
